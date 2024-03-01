@@ -59,6 +59,7 @@ class Search:
         Check if there is a external bang.
         If yes, update self.result_container and return True
         """
+        ##print("found it ", self.search_query)
         if self.search_query.external_bang:
             self.result_container.redirect_url = get_bang_url(self.search_query)
 

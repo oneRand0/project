@@ -183,7 +183,6 @@
     {%- include 'simple/preferences/tokens.html' -%}
     {{- tab_footer() -}}
 
-
     {{- tab_header('maintab', 'ui', _('User interface')) -}}
     {%- if 'locale' not in locked_preferences -%}
       {%- include 'simple/preferences/ui_locale.html' -%}
@@ -238,8 +237,14 @@
     {%- include 'simple/preferences/cookies.html' -%}
     {{- tab_footer() -}}
 
+    {{- tab_header('maintab', 'domains', _('Blocked Domains')) -}}
+    {%- include 'simple/preferences/blocked_domains.html' -%}
+    {{- tab_footer() -}}
+
     {{- tabs_close() -}}
     {%- include 'simple/preferences/footer.html' -%}
+
+    
 
   </form>{{- '' -}}
 {%- endblock -%}

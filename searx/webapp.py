@@ -40,6 +40,7 @@ from flask import (
     redirect,
     send_from_directory,
 )
+
 from flask.wrappers import Response
 from flask.json import jsonify
 
@@ -130,6 +131,8 @@ from searx.sxng_locales import sxng_locales
 from searx.search import SearchWithPlugins, initialize as search_initialize
 from searx.network import stream as http_stream, set_context_network_name
 from searx.search.checker import get_result as checker_get_result
+
+from searx.spoof_agent import generate_fake_user_agent
 
 logger = logger.getChild('webapp')
 
@@ -312,7 +315,7 @@ def image_proxify(url: str):
         partial_base64 = url[len('data:image/') : 50].split(';')
         if (
             len(partial_base64) == 2
-            and partial_base64[0] in ['gif', 'png', 'jpeg', 'pjpeg', 'webp', 'tiff', 'bmp']
+            and partial_base64[0] in ['gif', 'png', 'jpeg', 'pjpeg', 'tiff', 'bmp']
             and partial_base64[1].startswith('base64,')
         ):
             return url
@@ -657,7 +660,10 @@ def search():
         search_query, raw_text_query, _, _, selected_locale = get_search_query_from_webapp(
             request.preferences, request.form
         )
+
         search = SearchWithPlugins(search_query, request.user_plugins, request)  # pylint: disable=redefined-outer-name
+
+        request.user_agent = generate_fake_user_agent()
         result_container = search.search()
 
     except SearxParameterException as e:
@@ -698,7 +704,9 @@ def search():
     current_template = None
     previous_result = None
 
+    # this is were the results are stored
     results = result_container.get_ordered_results()
+    #filter_engines(results, res)
 
     if search_query.redirect_to_first_result and results:
         return redirect(results[0]['url'], 302)

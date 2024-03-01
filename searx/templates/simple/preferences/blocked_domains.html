@@ -1,0 +1,120 @@
+<div>
+    <h1>Blocked Domains</h1>
+    <p>Enter domain to block:</p>
+    <input type="text" id="domainInput" placeholder="www.google.com"/>
+    <input id="block" type="submit" value="{{ _('Block') }}" style="margin-right: 16px;"/>{{- ''
+    -}}
+    <!-- DON'T KNOW WHY THIS IS HERE OR WHEN I ADDED IT BUT STOPS THE PAGE FROM BRAKING SO LEAVE IT AND DON'T QUESTION IT-->
+    <ul id="blockedDomains"></ul>
+
+    <table class="cookies" id="domains">
+    </table>
+</div>
+
+<script>
+    if (typeof Storage !== "undefined") {
+        const input = document.getElementById("domainInput");
+        const blockButton = document.getElementById("block")
+        const table = document.getElementById("domains")
+
+        // Build table to display list of blocked domains
+        const buildTable = () => {
+            table.innerHTML = ""
+            count = 0
+            data.forEach(domain => {
+            let div =  document.createElement('div')
+                div.style.display = "flex"
+                div.style.flexDirection = "row"
+                div.style.justifyContent = "space-between"
+
+            let row = document.createElement('tr');
+                row.id = `row-${count}`
+                count%2 === 0 ? row.style.backgroundColor =  "#2c2c32" : row.style.backgroundColor = ""
+            // Create table cells for data and button
+            let dataCell = document.createElement('td');
+                dataCell.textContent = domain;
+                dataCell.style.alignSelf = "center"
+
+            // Create delete button
+            let buttonCell = document.createElement('td');
+            let button = document.createElement('input');       
+                button.id = count
+                button.type = "submit"   
+                button.value = "Delete"         
+                button.addEventListener("click", (e) => {
+                    //add func to delete domains from storage
+                    deleteDomain(button.id)
+                })
+                buttonCell.appendChild(button);
+
+            // Append cells to row
+            div.appendChild(dataCell);
+            div.appendChild(buttonCell);
+            row.appendChild(div)
+
+            // Append row to table body
+            table.appendChild(row);
+
+            // Add dividing line after row
+            //#2c2c32
+            count+=1
+        });
+        }
+
+        const addDomain = (domain) => {
+            event.preventDefault();
+
+            // RegEx pattern for domain validation
+            const domainPattern = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$/;
+            
+            if(domainPattern.test(input.value)){
+                // Check if the domain is already blocked
+                if (!data.includes(input.value)) {
+                    data.push(input.value);
+                    localStorage.setItem(
+                        "blocked_domains",
+                        JSON.stringify(data)
+                    );
+                    buildTable()
+                } else {
+                    alert("Domain already blocked");
+                }
+                input.value = ""
+            }else{
+                alert("Invalid domain");
+            }
+        };
+
+        const deleteDomain = (idx) => {
+            event.preventDefault();
+            const row = document.getElementById(`row-${idx}`).innerText
+
+            const temp = data.splice(idx, 1)
+            localStorage.setItem(
+                "blocked_domains",
+                JSON.stringify(data)
+            );
+
+            buildTable()
+
+        };
+
+        // Check if blocked domains object exist in localstorge if not create it
+        if (!localStorage.getItem("blocked_domains")) {
+            localStorage.setItem("blocked_domains", JSON.stringify([]));
+        }
+
+        // Fetch and parse blocked domains from localstorage
+        const data = JSON.parse(localStorage.getItem("blocked_domains"))
+
+        buildTable()
+
+        blockButton.addEventListener("click", () => {
+            addDomain()
+        })
+        
+        
+    } else {
+        // Add alert
+    }
+</script>
